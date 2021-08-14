@@ -1,0 +1,17 @@
+{
+  "yes": "Yes",
+  "no": "No",
+  "thereAreXFeatures": "There is {{count}} feature",
+  "thereAreXFeatures_plural": "There are {{count}} features",
+  "nested": {
+    "works": {
+      "correctly": "Nested works correctly",
+      "really": {
+        "well": "Nested works really well"
+      }
+    }
+  },
+  "andYouCanMissKeys": "And you can miss keys in non-default languages",
+  "orHaveDifferentPlaceholders": "Or have different placeholders, {{firstName}}",
+  "manyParameters": "You can have many parameters, {{title}} {{firstName}} {{lastName}}!"
+}

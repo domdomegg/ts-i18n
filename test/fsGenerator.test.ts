@@ -2,13 +2,13 @@ import { readdirSync, readFileSync, rmdirSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { generateFs } from '../src/fsGenerator';
 
-test('generates correct files with two locales', () => {
+test.each(['simple', 'large'])('fsGenerator generates correct files: %s', (dir) => {
   if (existsSync(resolve('test/generated'))) {
     rmdirSync(resolve('test/generated'), { recursive: true });
   }
 
   generateFs({
-    inputDirectory: 'test/resources',
+    inputDirectory: `test/resources/${dir}`,
     outputDirectory: 'test/generated',
     defaultLanguage: 'en',
   });

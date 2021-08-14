@@ -1,0 +1,8 @@
+{
+  "thereAreXFeatures": "Il y a {{count}} fonctionnalité",
+  "thereAreXFeatures_plural": "Il y a {{count}} fonctionnalités",
+  "nested": {
+    "works": "Imbriqué fonctionne"
+  },
+  "orHaveDifferentPlaceholders": "Ou avoir des espaces réservés différents, {{username}}"
+}
