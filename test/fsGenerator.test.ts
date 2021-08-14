@@ -13,9 +13,10 @@ test.each(['simple', 'large'])('fsGenerator generates correct files: %s', (dir) 
     defaultLanguage: 'en',
   });
 
-  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(4);
+  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(6);
   expect(readFileSync(resolve(__dirname, './generated/en.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/fr.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/types.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
-  expect(readFileSync(resolve(__dirname, './generated/index.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/utils.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/browser.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
 });
