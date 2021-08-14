@@ -1,7 +1,7 @@
 {
-  "name": "typescript-library-template",
-  "version": "0.0.1",
-  "description": "Template for creating TypeScript libraries",
+  "name": "ts-i18n",
+  "version": "0.0.0",
+  "description": "i18n with proper TypeScript support",
   "license": "MIT",
   "author": "Adam Jones (domdomegg)",
   "main": "dist/index.js",
@@ -9,6 +9,9 @@
   "files": [
     "dist"
   ],
+  "bin": {
+    "ts-i18n": "dist/cli.js"
+  },
   "scripts": {
     "pretest": "npm run build",
     "test": "jest",
@@ -19,6 +22,9 @@
     "build": "tsc",
     "prepublishOnly": "npm run clean && npm run build"
   },
+  "dependencies": {
+    "commander": "^8.1.0"
+  },
   "devDependencies": {
     "@types/jest": "^27.0.1",
     "jest": "^27.0.6",
@@ -28,6 +34,9 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "watchPathIgnorePatterns": [
+      "<rootDir>/test/generated/"
+    ]
   }
 }

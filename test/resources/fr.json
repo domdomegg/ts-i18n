@@ -1,0 +1,15 @@
+{
+  "yes": "Oui",
+  "no": "Non",
+  "thereAreXFeatures": "Il y a {{count}} fonctionnalité",
+  "thereAreXFeatures_plural": "Il y a {{count}} fonctionnalités",
+  "nested": {
+    "works": {
+      "correctly": "Imbriqué fonctionne correctement",
+      "really": {
+        "well": "Imbriqué fonctionne très bien"
+      }
+    }
+  },
+  "orHaveDifferentPlaceholders": "Ou avoir des espaces réservés différents, {{username}}"
+}

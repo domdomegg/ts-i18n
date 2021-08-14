@@ -120,3 +120,4 @@ dist
 # built artifacts
 build/
 dist/
+generated/
