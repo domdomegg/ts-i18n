@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { generateCore, Files } from './core';
 
@@ -7,7 +7,6 @@ export const generateFs = (options: {
   outputDirectory: string;
   defaultLanguage: string;
 }): void => {
-  createDirectory(options.outputDirectory);
   const languageFiles = getLanguageFiles(options.inputDirectory);
   if (!languageFiles.length) throw new Error(`No language files found in ${options.inputDirectory}`);
   const code = generateCore({
@@ -15,10 +14,6 @@ export const generateFs = (options: {
     defaultLanguage: options.defaultLanguage,
   });
   writeToDirectory(options.outputDirectory, code);
-};
-
-const createDirectory = (directory: string): void => {
-  mkdirSync(resolve(directory), { recursive: true });
 };
 
 const getLanguageFiles = (directory: string): Files => readdirSync(resolve(directory))
@@ -29,7 +24,13 @@ const getLanguageFiles = (directory: string): Files => readdirSync(resolve(direc
   }));
 
 const writeToDirectory = (directory: string, files: Files): void => {
+  mkdirSync(resolve(directory), { recursive: true });
   files.forEach((file) => {
-    writeFileSync(resolve(directory, file.name), file.content, { encoding: 'utf-8' });
+    const path = resolve(directory, file.name);
+    if (existsSync(path) && readFileSync(path, { encoding: 'utf-8' }) === file.content) {
+      // Don't write if no changes
+      return;
+    }
+    writeFileSync(path, file.content, { encoding: 'utf-8' });
   });
 };
