@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`can disable emitting .gitignore 1`] = `
+Array [
+  "en.ts",
+  "types.ts",
+  "utils.ts",
+  "browser.ts",
+]
+`;
+
+exports[`can disable emitting browser helper 1`] = `
+Array [
+  "en.ts",
+  "types.ts",
+  "utils.ts",
+  ".gitignore",
+]
+`;
+
+exports[`can disable emitting utils 1`] = `
+Array [
+  "en.ts",
+  "types.ts",
+  ".gitignore",
+]
+`;
+
 exports[`core generates correct files with one locale 1`] = `
 Array [
   Object {

@@ -1,17 +1,15 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { generateCore, Files } from './core';
+import { generateCore, Files, GenerateCommonOptions } from './core';
 
-export const generateFs = (options: {
-  inputDirectory: string;
-  outputDirectory: string;
-  defaultLanguage: string;
-}): void => {
+export type GenerateFsOptions = { inputDirectory: string; outputDirectory: string; } & GenerateCommonOptions
+
+export const generateFs = (options: GenerateFsOptions): void => {
   const languageFiles = getLanguageFiles(options.inputDirectory);
   if (!languageFiles.length) throw new Error(`No language files found in ${options.inputDirectory}`);
   const code = generateCore({
     inputFiles: languageFiles,
-    defaultLanguage: options.defaultLanguage,
+    ...options,
   });
   writeToDirectory(options.outputDirectory, code);
 };

@@ -6,24 +6,40 @@ type LanguageTypeKey = { type: 'object', values: LanguageType } | { type: 'strin
 type LanguageDefinition = { [key: string]: LanguageDefinitionKey }
 type LanguageDefinitionKey = LanguageDefinition | string
 
+export type GenerateCommonOptions = {
+  defaultLanguage?: string;
+  emitGitIgnore?: boolean;
+} & ({
+  emitUtils: false;
+  emitBrowser: false;
+} | {
+  emitUtils?: true;
+  emitBrowser?: boolean;
+})
+
+export type GenerateCoreOptions = { inputFiles: Files } & GenerateCommonOptions
+
 export type Files = { name: string, content: string }[]
 
-export const generateCore = (options: {
-  inputFiles: Files,
-  defaultLanguage: string,
-}): Files => {
+export const generateCore = ({
+  inputFiles,
+  defaultLanguage = 'en',
+  emitGitIgnore = true,
+  emitUtils = true,
+  emitBrowser = true,
+}: GenerateCoreOptions): Files => {
   const outputFiles: Files = [];
 
-  if (new Set(options.inputFiles.map((f) => f.name)).size !== options.inputFiles.length) {
+  if (new Set(inputFiles.map((f) => f.name)).size !== inputFiles.length) {
     throw new Error('Duplicate input file name');
   }
 
-  const defaultLanguageFile = options.inputFiles.find((f) => f.name.slice(0, -5) === options.defaultLanguage);
+  const defaultLanguageFile = inputFiles.find((f) => f.name.slice(0, -5) === defaultLanguage);
   if (!defaultLanguageFile) {
-    throw new Error(`Default language file does not exist (expected ${options.defaultLanguage}.json)`);
+    throw new Error(`Default language file does not exist (expected ${defaultLanguage}.json)`);
   }
 
-  const languageType: LanguageType = options.inputFiles.reduce<LanguageType>((acc, file) => {
+  const languageType: LanguageType = inputFiles.reduce<LanguageType>((acc, file) => {
     if (!file.name.endsWith('.json')) throw new Error(`Input file names must end with .json, but received ${file.name}`);
     const parsedContent = asLanguageDefinition(saferJSONParse(file.content, file.name), file.name);
 
@@ -36,9 +52,10 @@ export const generateCore = (options: {
   // i.e. assertThat(generateLanguageType(defaultLanguageFile)).isSubTypeOf(languageType)
 
   outputFiles.push({ name: 'types.ts', content: generateTypes(languageType, false) });
-  outputFiles.push({ name: 'utils.ts', content: generateUtils(options) });
-  outputFiles.push({ name: 'browser.ts', content: generateBrowser() });
-  outputFiles.push({ name: '.gitignore', content: `${outputFiles.map((f) => f.name).join('\n')}\n.gitignore` });
+
+  if (emitUtils) outputFiles.push({ name: 'utils.ts', content: generateUtils({ inputFiles, defaultLanguage }) });
+  if (emitBrowser) outputFiles.push({ name: 'browser.ts', content: generateBrowser() });
+  if (emitGitIgnore) outputFiles.push({ name: '.gitignore', content: `${outputFiles.map((f) => f.name).join('\n')}\n.gitignore` });
 
   return outputFiles;
 };
