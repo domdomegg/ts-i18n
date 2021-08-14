@@ -1,6 +1,6 @@
 {
   "name": "ts-i18n",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight i18n with proper TypeScript support",
   "license": "MIT",
   "author": "Adam Jones (domdomegg)",
