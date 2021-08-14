@@ -53,20 +53,20 @@ exports[`fsGenerator generates correct files: large 3`] = `
 /* eslint-disable */
 export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }
 export interface Language {
-  yes: (p?: { [key: string]: string }) => string,
-  no: (p?: { [key: string]: string }) => string,
-  thereAreXFeatures: (p: { count: number, [key: string]: string }) => string,
+  yes: (p?: { [key: string]: string | number }) => string,
+  no: (p?: { [key: string]: string | number }) => string,
+  thereAreXFeatures: (p: { count: number, [key: string]: string | number }) => string,
   nested: {
     works: {
-      correctly: (p?: { [key: string]: string }) => string,
+      correctly: (p?: { [key: string]: string | number }) => string,
       really: {
-        well: (p?: { [key: string]: string }) => string,
+        well: (p?: { [key: string]: string | number }) => string,
       },
     },
   },
-  andYouCanMissKeys: (p?: { [key: string]: string }) => string,
-  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number, [key: string]: string }) => string,
-  manyParameters: (p: { title: string | number, firstName: string | number, lastName: string | number, [key: string]: string }) => string,
+  andYouCanMissKeys: (p?: { [key: string]: string | number }) => string,
+  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number, [key: string]: string | number }) => string,
+  manyParameters: (p: { title: string | number, firstName: string | number, lastName: string | number, [key: string]: string | number }) => string,
 }
 "
 `;
@@ -175,12 +175,12 @@ exports[`fsGenerator generates correct files: simple 3`] = `
 /* eslint-disable */
 export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }
 export interface Language {
-  thereAreXFeatures: (p: { count: number, [key: string]: string }) => string,
+  thereAreXFeatures: (p: { count: number, [key: string]: string | number }) => string,
   nested: {
-    works: (p?: { [key: string]: string }) => string,
+    works: (p?: { [key: string]: string | number }) => string,
   },
-  andYouCanMissKeys: (p?: { [key: string]: string }) => string,
-  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number, [key: string]: string }) => string,
+  andYouCanMissKeys: (p?: { [key: string]: string | number }) => string,
+  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number, [key: string]: string | number }) => string,
 }
 "
 `;

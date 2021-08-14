@@ -180,9 +180,9 @@ const generateTypeFragment = (languageType: LanguageType, options: { errOnUnused
     } else if (!options.includePlurals && key.endsWith('_plural')) {
       // noop
     } else if (languageTypeKey.params.size === 0) {
-      code += `\n${key}: (${options.errOnUnusedParam ? '' : 'p?: { [key: string]: string }'}) => string,`;
+      code += `\n${key}: (${options.errOnUnusedParam ? '' : 'p?: { [key: string]: string | number }'}) => string,`;
     } else {
-      code += `\n${key}: (p: { ${[...languageTypeKey.params].map((p) => (p === 'count' ? `${p}: number` : `${p}: string | number`)).join(', ')}${options.errOnUnusedParam ? '' : ', [key: string]: string'} }) => string,`;
+      code += `\n${key}: (p: { ${[...languageTypeKey.params].map((p) => (p === 'count' ? `${p}: number` : `${p}: string | number`)).join(', ')}${options.errOnUnusedParam ? '' : ', [key: string]: string | number'} }) => string,`;
     }
   });
   return code;
