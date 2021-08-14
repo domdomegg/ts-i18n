@@ -1,24 +1,15 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
-import { generateFs } from "./fsGenerator";
-import { program } from "commander";
+import { program } from 'commander';
+import { generateFs } from './fsGenerator';
 
 const cli = (args: string[]) => {
   program
-    .description("i18n with proper TypeScript support")
-    .requiredOption(
-      "-i, --input <folder>",
-      "Input folder for your input JSON files"
-    )
-    .requiredOption(
-      "-o, --output <folder>",
-      "Output folder for your generated .ts files"
-    )
-    .requiredOption(
-      "-d, --default-language <lang>",
-      "The default/fallback/primary language",
-      "en"
-    )
+    .description('i18n with proper TypeScript support')
+    .requiredOption('-i, --input <folder>', 'Input folder for your input JSON files')
+    .requiredOption('-o, --output <folder>', 'Output folder for your generated .ts files')
+    .requiredOption('-d, --default-language <lang>', 'The default/fallback/primary language', 'en')
     .parse(args);
 
   generateFs({
@@ -32,9 +23,9 @@ try {
   cli(process.argv);
 } catch (e) {
   // A bold red 'Error: '
-  const errorPrefix = "\x1b[1;31mError:\x1b[0m ";
+  const errorPrefix = '\x1b[1;31mError:\x1b[0m ';
 
-  const helpHint = "\x1b[1mHint:\x1b[0m View help with --help";
+  const helpHint = '\x1b[1mHint:\x1b[0m View help with --help';
 
   if (e instanceof Error) {
     console.error(errorPrefix + e.message);

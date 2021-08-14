@@ -1,2 +1,2 @@
-export { generateCore } from "./core";
-export { generateFs } from "./fsGenerator";
+export { generateCore } from './core';
+export { generateFs } from './fsGenerator';

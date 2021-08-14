@@ -1,69 +1,42 @@
-import { bannedNames } from "./bannedNames";
+import bannedNames from './bannedNames';
 
-type LanguageType = { [key: string]: LanguageTypeKey };
-type LanguageTypeKey =
-  | { type: "object"; values: LanguageType }
-  | { type: "string"; params: Set<string> };
+type LanguageType = { [key: string]: LanguageTypeKey }
+type LanguageTypeKey = { type: 'object', values: LanguageType } | { type: 'string', params: Set<string> }
 
-type LanguageDefinition = { [key: string]: LanguageDefinitionKey };
-type LanguageDefinitionKey = LanguageDefinition | string;
+type LanguageDefinition = { [key: string]: LanguageDefinitionKey }
+type LanguageDefinitionKey = LanguageDefinition | string
 
-export type Files = { name: string; content: string }[];
+export type Files = { name: string, content: string }[]
 
 export const generateCore = (options: {
-  inputFiles: Files;
-  defaultLanguage: string;
+  inputFiles: Files,
+  defaultLanguage: string,
 }): Files => {
   const outputFiles: Files = [];
 
-  if (
-    new Set(options.inputFiles.map((f) => f.name)).size !==
-    options.inputFiles.length
-  ) {
-    throw new Error("Duplicate input file name");
+  if (new Set(options.inputFiles.map((f) => f.name)).size !== options.inputFiles.length) {
+    throw new Error('Duplicate input file name');
   }
 
-  const defaultLanguageFile = options.inputFiles.find(
-    (f) => f.name.slice(0, -5) === options.defaultLanguage
-  );
+  const defaultLanguageFile = options.inputFiles.find((f) => f.name.slice(0, -5) === options.defaultLanguage);
   if (!defaultLanguageFile) {
-    throw new Error(
-      "Default language file does not exist (expected " +
-        options.defaultLanguage +
-        ".json)"
-    );
+    throw new Error(`Default language file does not exist (expected ${options.defaultLanguage}.json)`);
   }
 
-  const languageType: LanguageType = options.inputFiles.reduce<LanguageType>(
-    (acc, file) => {
-      if (!file.name.endsWith(".json"))
-        throw new Error(
-          "Input file names must end with .json, but received " + file.name
-        );
-      const parsedContent = asLanguageDefinition(
-        saferJSONParse(file.content, file.name),
-        file.name
-      );
+  const languageType: LanguageType = options.inputFiles.reduce<LanguageType>((acc, file) => {
+    if (!file.name.endsWith('.json')) throw new Error(`Input file names must end with .json, but received ${file.name}`);
+    const parsedContent = asLanguageDefinition(saferJSONParse(file.content, file.name), file.name);
 
-      const { code, languageType } = generateCodeAndLanguageType(
-        parsedContent,
-        file === defaultLanguageFile,
-        acc
-      );
-      outputFiles.push({ name: file.name.slice(0, -5) + ".ts", content: code });
-      return languageType;
-    },
-    {}
-  );
+    const { code, languageType } = generateCodeAndLanguageType(parsedContent, file === defaultLanguageFile, acc);
+    outputFiles.push({ name: `${file.name.slice(0, -5)}.ts`, content: code });
+    return languageType;
+  }, {});
 
   // TODO: check the default language meets the language type (we might get this for free with TS? not sure - need to check)
   // i.e. assertThat(generateLanguageType(defaultLanguageFile)).isSubTypeOf(languageType)
 
-  outputFiles.push({
-    name: "types.ts",
-    content: generateTypes(languageType, false),
-  });
-  outputFiles.push({ name: "index.ts", content: generateIndex(options) });
+  outputFiles.push({ name: 'types.ts', content: generateTypes(languageType, false) });
+  outputFiles.push({ name: 'index.ts', content: generateIndex(options) });
 
   return outputFiles;
 };
@@ -72,45 +45,27 @@ const saferJSONParse = (str: string, errorIn?: string) => {
   try {
     return JSON.parse(str);
   } catch {
-    throw new Error(
-      "Failed to pass JSON" + errorIn ? " (in " + errorIn + ")" : ""
-    );
+    throw new Error(`Failed to pass JSON${errorIn ? ` (in ${errorIn})` : ''}`);
   }
 };
 
 // Checks an object is a valid language definition, throwing if it isn't one
-const asLanguageDefinition = (
-  obj: any,
-  errorIn?: string
-): LanguageDefinition => {
+const asLanguageDefinition = (obj: unknown, errorIn?: string): LanguageDefinition => {
   if (Array.isArray(obj)) {
-    throw new Error(
-      "Invalid language definition as found array" + errorIn
-        ? " (in " + errorIn + ")"
-        : ""
-    );
+    throw new Error(`Invalid language definition as found array${errorIn ? ` (in ${errorIn})` : ''}`);
   }
 
-  if (typeof obj !== "object") {
-    throw new Error(
-      "Invalid language definition as found " + typeof obj + errorIn
-        ? " (in " + errorIn + ")"
-        : ""
-    );
+  if (typeof obj !== 'object') {
+    throw new Error(`Invalid language definition as found ${typeof obj}${errorIn ? ` (in ${errorIn})` : ''}`);
   }
 
-  for (let key in obj) {
-    if (!/[a-zA-Z_$][0-9a-zA-Z_$]*/.test(key))
-      throw new Error(
-        "Invalid language definition due to bad key: '" + key + "'" + errorIn
-          ? " (in " + errorIn + ")"
-          : ""
-      );
+  Object.entries(obj as { [key: string]: unknown }).forEach(([key, value]) => {
+    if (!/[a-zA-Z_$][0-9a-zA-Z_$]*/.test(key)) throw new Error(`Invalid language definition due to bad key: '${key}'${errorIn ? ` (in ${errorIn})` : ''}`);
 
-    if (typeof obj[key] !== "string") {
-      asLanguageDefinition(obj[key], errorIn);
+    if (typeof value !== 'string') {
+      asLanguageDefinition(value, errorIn);
     }
-  }
+  });
 
   return obj as LanguageDefinition;
 };
@@ -122,16 +77,12 @@ const asLanguageDefinition = (
  * @returns code for the given language definition, and updated constraints on the language type
  */
 // TODO: possibly extract the language type generation
-const generateCodeAndLanguageType = (
-  language: LanguageDefinition,
-  isDefault: boolean,
-  languageType: LanguageType = {}
-): { code: string; languageType: LanguageType } => ({
+const generateCodeAndLanguageType = (language: LanguageDefinition, isDefault: boolean, languageType: LanguageType = {}): { code: string, languageType: LanguageType } => ({
   code: `// Do not edit directly, this is generated by ts-i18n
 /* eslint-disable */
-import { Language${isDefault ? "" : ", DeepPartial"} } from "./types"
+import { Language${isDefault ? '' : ', DeepPartial'} } from "./types"
 const lang = {${indent(generateCodeFragment(language, languageType))}\n}
-export default lang as ${isDefault ? "Language" : "DeepPartial<Language>"}\n`,
+export default lang as ${(isDefault ? 'Language' : 'DeepPartial<Language>')}\n`,
   languageType,
 });
 
@@ -142,196 +93,83 @@ export default lang as ${isDefault ? "Language" : "DeepPartial<Language>"}\n`,
  * @returns fragment of code for the given language definition, and updated constraints on the language type
  */
 // TODO: general tidy up, and possibly extract the language type generation
-const generateCodeFragment = (
-  language: LanguageDefinition,
-  languageType: LanguageType,
-  path = ""
-) => {
-  let code = "";
-  for (const key in language) {
-    const value = language[key];
-
-    if (typeof value == "object") {
+/* eslint-disable no-param-reassign */
+const generateCodeFragment = (language: LanguageDefinition, languageType: LanguageType, path = '') => {
+  let code = '';
+  Object.entries(language).forEach(([key, languageValue]) => {
+    if (typeof languageValue === 'object') {
       if (languageType[key] === undefined) {
-        languageType[key] = { type: "object", values: {} };
+        languageType[key] = { type: 'object', values: {} };
       }
 
       const languageTypeKey = languageType[key];
-      if (languageTypeKey.type !== "object") {
-        throw new Error(
-          "Incompatible type at " +
-            path +
-            ", some translation files define objects and others define strings"
-        );
+      if (languageTypeKey.type !== 'object') {
+        throw new Error(`Incompatible type at ${path}, some translation files define objects and others define strings`);
       }
 
-      code +=
-        "\n" +
-        key +
-        ": {" +
-        indent(
-          generateCodeFragment(
-            value,
-            languageTypeKey.values,
-            path.length
-              ? path + "[" + JSON.stringify(key) + "]"
-              : JSON.stringify(key)
-          )
-        ) +
-        "\n},";
-    } else if (typeof value == "string") {
+      code += `\n${key}: {${indent(generateCodeFragment(languageValue, languageTypeKey.values, path.length ? `${path}[${JSON.stringify(key)}]` : JSON.stringify(key)))}\n},`;
+    } else {
       if (languageType[key] === undefined) {
-        languageType[key] = { type: "string", params: new Set() };
+        languageType[key] = { type: 'string', params: new Set() };
       }
 
       const languageTypeKey = languageType[key];
-      if (languageTypeKey.type !== "string") {
-        throw new Error(
-          "Incompatible type at " +
-            path +
-            ", some translation files define objects and others define strings"
-        );
+      if (languageTypeKey.type !== 'string') {
+        throw new Error(`Incompatible type at ${path}, some translation files define objects and others define strings`);
       }
 
-      const stringified = JSON.stringify(value);
+      const stringified = JSON.stringify(languageValue);
 
       // TODO: come up with a way of escaping parameters
-      const params = [
-        ...new Set(
-          [...stringified.matchAll(/\{\{[a-zA-Z_$][0-9a-zA-Z_$]*\}\}/g)].map(
-            (match) => match[0].slice(2, -2)
-          )
-        ),
-      ];
-      for (const param of params) {
-        if (bannedNames.includes(param))
-          throw new Error(
-            "Cannot use param name '" + param + "' as it is a reserved word"
-          );
-      }
-      if (params.length && key + "_plural" in language) {
-        let countRequired = params.includes("count");
-        if (!countRequired) params.push("count");
+      const params = [...new Set([...stringified.matchAll(/\{\{[a-zA-Z_$][0-9a-zA-Z_$]*\}\}/g)].map((match) => match[0].slice(2, -2)))];
+      params.forEach((param) => {
+        if (bannedNames.includes(param)) throw new Error(`Cannot use param name '${param}' as it is a reserved word`);
+      });
+      if (params.length && `${key}_plural` in language) {
+        const countRequired = params.includes('count');
+        if (!countRequired) params.push('count');
 
-        const body =
-          "p.count === 1 ? (" +
-          stringified.replace(
-            /\{\{([a-zA-Z_$][0-9a-zA-Z_$]*)\}\}/g,
-            '" + p.$1.toString() + "'
-          ) +
-          ") : lang." +
-          path +
-          key +
-          "_plural(p)";
-        code +=
-          "\n" +
-          key +
-          ": (p: { " +
-          params
-            .map((p) =>
-              p === "count"
-                ? p + (countRequired ? "" : "?") + ": number"
-                : p + ": string | number"
-            )
-            .join(", ") +
-          " }): string => " +
-          body +
-          ",";
+        const body = `p.count === 1 ? (${stringified.replace(/\{\{([a-zA-Z_$][0-9a-zA-Z_$]*)\}\}/g, '" + p.$1.toString() + "')}) : lang.${path}${key}_plural(p)`;
+        code += `\n${key}: (p: { ${params.map((p) => (p === 'count' ? `${p + (countRequired ? '' : '?')}: number` : `${p}: string | number`)).join(', ')} }): string => ${body},`;
       } else if (params.length) {
-        const body = stringified.replace(
-          /\{\{([a-zA-Z_$][0-9a-zA-Z_$]*)\}\}/g,
-          '" + p.$1.toString() + "'
-        );
-        code +=
-          "\n" +
-          key +
-          ": (p: { " +
-          params.map((p) => p + ": string | number").join(", ") +
-          " }): string => " +
-          body +
-          ",";
+        const body = stringified.replace(/\{\{([a-zA-Z_$][0-9a-zA-Z_$]*)\}\}/g, '" + p.$1.toString() + "');
+        code += `\n${key}: (p: { ${params.map((p) => `${p}: string | number`).join(', ')} }): string => ${body},`;
       } else {
-        code += "\n" + key + ": (): string => " + stringified + ",";
+        code += `\n${key}: (): string => ${stringified},`;
       }
 
-      for (const param of params) languageTypeKey.params.add(param);
-    } else {
-      throw new Error(
-        "Values of type " +
-          typeof value +
-          " are not supported in translation files, but was found at " +
-          path
-      );
+      params.forEach((param) => languageTypeKey.params.add(param));
     }
-  }
+  });
   return code;
 };
 
-const generateTypes = (
-  languageType: LanguageType,
-  includePlurals: boolean = true
-) =>
-  "// Do not edit directly, this is generated by ts-i18n\n" +
-  "/* eslint-disable */\n" +
-  "export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }\n" +
-  "export interface Language {" +
-  indent(generateTypeFragment(languageType, includePlurals)) +
-  "\n}\n";
+const generateTypes = (languageType: LanguageType, includePlurals = true) => (
+  `${'// Do not edit directly, this is generated by ts-i18n\n'
+  + '/* eslint-disable */\n'
+  + 'export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }\n'
+  + 'export interface Language {'}${indent(generateTypeFragment(languageType, includePlurals))}\n}\n`
+);
 
-const generateTypeFragment = (
-  languageType: LanguageType,
-  includePlurals: boolean
-) => {
-  let code = "";
-  for (const key in languageType) {
-    const languageTypeKey = languageType[key];
-    if (languageTypeKey.type == "object") {
-      code +=
-        "\n" +
-        key +
-        ": {" +
-        indent(generateTypeFragment(languageTypeKey.values, includePlurals)) +
-        "\n},";
-    } else if (languageTypeKey.type == "string") {
-      if (!includePlurals && key.endsWith("_plural")) {
-        // noop
-      } else if (languageTypeKey.params.size == 0) {
-        code += "\n" + key + ": () => string,";
-      } else {
-        code +=
-          "\n" +
-          key +
-          ": (p: { " +
-          [...languageTypeKey.params]
-            .map((p) =>
-              p === "count" ? p + ": number" : p + ": string | number"
-            )
-            .join(", ") +
-          " }) => string,";
-      }
+const generateTypeFragment = (languageType: LanguageType, includePlurals: boolean) => {
+  let code = '';
+  Object.entries(languageType).forEach(([key, languageTypeKey]) => {
+    if (languageTypeKey.type === 'object') {
+      code += `\n${key}: {${indent(generateTypeFragment(languageTypeKey.values, includePlurals))}\n},`;
+    } else if (!includePlurals && key.endsWith('_plural')) {
+      // noop
+    } else if (languageTypeKey.params.size === 0) {
+      code += `\n${key}: () => string,`;
     } else {
-      throw new Error("Unexpected type " + (languageTypeKey as any).type);
+      code += `\n${key}: (p: { ${[...languageTypeKey.params].map((p) => (p === 'count' ? `${p}: number` : `${p}: string | number`)).join(', ')} }) => string,`;
     }
-  }
+  });
   return code;
 };
 
-const generateIndex = (options: {
-  inputFiles: Files;
-  defaultLanguage: string;
-}) => {
-  return `// Do not edit directly, this is generated by ts-i18n
+const generateIndex = (options: { inputFiles: Files, defaultLanguage: string }) => `// Do not edit directly, this is generated by ts-i18n
 /* eslint-disable */
-${options.inputFiles
-  .map(
-    (f) =>
-      "import " +
-      f.name.slice(0, -5) +
-      " from './" +
-      f.name.slice(0, -5) +
-      "'\n"
-  )
-  .join("")}import { Language, DeepPartial } from './types'
+${options.inputFiles.map((f) => `import ${f.name.slice(0, -5)} from './${f.name.slice(0, -5)}'\n`).join('')}import { Language, DeepPartial } from './types'
 
 /**
  * Merges two languages together, preferring the preferred language where possible
@@ -351,15 +189,8 @@ export const merge = (preferredLang: DeepPartial<Language>, defaultLang: Languag
   return preferredLang as Language
 }
 
-export const languages = { ${options.inputFiles
-    .map((f) => f.name.slice(0, -5))
-    .join(", ")} }
+export const languages = { ${options.inputFiles.map((f) => f.name.slice(0, -5)).join(', ')} }
 
 export const defaultLanguage = ${JSON.stringify(options.defaultLanguage)}`;
-};
 
-const indent = (str: string): string =>
-  str
-    .split("\n")
-    .map((line) => (line.length ? "  " + line : line))
-    .join("\n");
+const indent = (str: string): string => str.split('\n').map((line) => (line.length ? `  ${line}` : line)).join('\n');
