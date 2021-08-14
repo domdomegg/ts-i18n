@@ -53,20 +53,20 @@ exports[`fsGenerator generates correct files: large 3`] = `
 /* eslint-disable */
 export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }
 export interface Language {
-  yes: () => string,
-  no: () => string,
-  thereAreXFeatures: (p: { count: number }) => string,
+  yes: (p?: { [key: string]: string }) => string,
+  no: (p?: { [key: string]: string }) => string,
+  thereAreXFeatures: (p: { count: number, [key: string]: string }) => string,
   nested: {
     works: {
-      correctly: () => string,
+      correctly: (p?: { [key: string]: string }) => string,
       really: {
-        well: () => string,
+        well: (p?: { [key: string]: string }) => string,
       },
     },
   },
-  andYouCanMissKeys: () => string,
-  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number }) => string,
-  manyParameters: (p: { title: string | number, firstName: string | number, lastName: string | number }) => string,
+  andYouCanMissKeys: (p?: { [key: string]: string }) => string,
+  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number, [key: string]: string }) => string,
+  manyParameters: (p: { title: string | number, firstName: string | number, lastName: string | number, [key: string]: string }) => string,
 }
 "
 `;
@@ -175,12 +175,12 @@ exports[`fsGenerator generates correct files: simple 3`] = `
 /* eslint-disable */
 export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }
 export interface Language {
-  thereAreXFeatures: (p: { count: number }) => string,
+  thereAreXFeatures: (p: { count: number, [key: string]: string }) => string,
   nested: {
-    works: () => string,
+    works: (p?: { [key: string]: string }) => string,
   },
-  andYouCanMissKeys: () => string,
-  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number }) => string,
+  andYouCanMissKeys: (p?: { [key: string]: string }) => string,
+  orHaveDifferentPlaceholders: (p: { firstName: string | number, username: string | number, [key: string]: string }) => string,
 }
 "
 `;

@@ -27,6 +27,16 @@ test.each(['simple', 'large'])('core generates correct files: %s', (dir) => {
   ).toMatchSnapshot();
 });
 
+test.each(['simple', 'large'])('core generates correct files with errOnUnusedParam: %s', (dir) => {
+  expect(
+    generateCore({
+      inputFiles: [getFile(`${dir}/en.json`), getFile(`${dir}/fr.json`)],
+      defaultLanguage: 'en',
+      errOnUnusedParam: true,
+    }),
+  ).toMatchSnapshot();
+});
+
 test('can disable emitting .gitignore', () => {
   expect(
     generateCore({
