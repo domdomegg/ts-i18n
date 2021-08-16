@@ -23,7 +23,9 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "commander": "^8.1.0"
+    "commander": "^8.1.0",
+    "jsonc-parser": "^3.0.0",
+    "source-map": "^0.7.3"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
