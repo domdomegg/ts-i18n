@@ -63,6 +63,7 @@ export const generateCore = ({
     if (!file.name.endsWith('.json') && !file.name.endsWith('.jsonc')) throw new Error(`Input file names must end with .json, but received ${file.name}`);
     const parsedContent = parseTree(file.content);
     if (!parsedContent) throw new Error(`Invalid JSON in ${file.name}`);
+    if (parsedContent.type !== 'object') throw new Error(`Expected JSON object in ${file.name}, but just got a ${parsedContent.type}`);
 
     const code = generateCode(parsedContent, acc, file === defaultLanguageFile);
     outputFiles.push({ name: `${withoutExt(file.name)}.ts`, content: code });
@@ -163,7 +164,7 @@ const generateCodeFragment = (language: Node, type: LanguageType, isDefault: boo
       if (type[key] === undefined && isDefault) {
         type[key] = { [originalOffset]: language.parent!.children![0].offset + 1 };
       } else if (type[key] === undefined) {
-        throw new Error(`Default language is missing object entry at ${path}`);
+        throw new Error(`Default language is missing entry at ${path}`);
       } else if (type[key] instanceof Set) {
         throw new Error(`Incompatible type, found both object and string at ${path}`);
       }
@@ -204,7 +205,7 @@ const generateCodeFragment = (language: Node, type: LanguageType, isDefault: boo
       type[singularKey] = new Set(params) as Set<string> & { [originalOffset]: number };
       type[singularKey][originalOffset] = language.parent!.children![0].offset + 1;
     } else if (type[singularKey] === undefined) {
-      throw new Error(`Default language is missing object entry at ${path}`);
+      throw new Error(`Default language is missing entry at ${path}`);
     } else if (type[singularKey] instanceof Set) {
       params.forEach((p) => (type[singularKey] as Set<string>).add(p));
     } else {

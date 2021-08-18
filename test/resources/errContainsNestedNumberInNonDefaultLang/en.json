@@ -1,0 +1,9 @@
+{
+  "thisFile": {
+    "hasANested": {
+      "valueFor": {
+        "oneHundred": "One hundred"
+      }
+    }
+  }
+}

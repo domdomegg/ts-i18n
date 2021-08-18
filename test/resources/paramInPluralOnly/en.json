@@ -1,0 +1,4 @@
+{
+  "youHaveXNewMessages": "You have {{count}} new message",
+  "youHaveXNewMessages_plural": "You have {{count}} new messages, {{name}}"
+}
