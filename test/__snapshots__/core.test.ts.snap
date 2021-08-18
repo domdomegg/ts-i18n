@@ -171,7 +171,7 @@ export default language
     "name": "browser.ts",
   },
   Object {
-    "content": "{\\"version\\":3,\\"sources\\":[\\"../resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AACA;AACA;AAEA;AACE;AACE;AACA;AACE;;;;AAIN;AACA;AACA\\",\\"file\\":\\"types.d.ts\\"}",
+    "content": "{\\"version\\":3,\\"sources\\":[\\"./resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AACA;AACA;AAEA;AACE;AACE;AACA;AACE;;;;AAIN;AACA;AACA\\",\\"file\\":\\"types.d.ts\\"}",
     "name": "types.d.ts.map",
   },
   Object {
@@ -296,7 +296,7 @@ export default language
     "name": "browser.ts",
   },
   Object {
-    "content": "{\\"version\\":3,\\"sources\\":[\\"../resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}",
+    "content": "{\\"version\\":3,\\"sources\\":[\\"./resources/simple/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}",
     "name": "types.d.ts.map",
   },
   Object {
@@ -404,7 +404,7 @@ export default language
     "name": "browser.ts",
   },
   Object {
-    "content": "{\\"version\\":3,\\"sources\\":[\\"../resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}",
+    "content": "{\\"version\\":3,\\"sources\\":[\\"./resources/simple/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}",
     "name": "types.d.ts.map",
   },
   Object {
@@ -551,7 +551,7 @@ export default language
     "name": "browser.ts",
   },
   Object {
-    "content": "{\\"version\\":3,\\"sources\\":[\\"../resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AACA;AACA;AAEA;AACE;AACE;AACA;AACE;;;;AAIN;AACA;AACA\\",\\"file\\":\\"types.d.ts\\"}",
+    "content": "{\\"version\\":3,\\"sources\\":[\\"./resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AACA;AACA;AAEA;AACE;AACE;AACA;AACE;;;;AAIN;AACA;AACA\\",\\"file\\":\\"types.d.ts\\"}",
     "name": "types.d.ts.map",
   },
   Object {
@@ -676,7 +676,7 @@ export default language
     "name": "browser.ts",
   },
   Object {
-    "content": "{\\"version\\":3,\\"sources\\":[\\"../resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}",
+    "content": "{\\"version\\":3,\\"sources\\":[\\"./resources/simple/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}",
     "name": "types.d.ts.map",
   },
   Object {

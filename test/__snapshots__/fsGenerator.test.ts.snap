@@ -257,4 +257,4 @@ types.d.ts.map
 .gitignore"
 `;
 
-exports[`fsGenerator generates correct files: simple 7`] = `"{\\"version\\":3,\\"sources\\":[\\"../resources/large/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}"`;
+exports[`fsGenerator generates correct files: simple 7`] = `"{\\"version\\":3,\\"sources\\":[\\"../resources/simple/en.json\\"],\\"names\\":[],\\"mappings\\":\\";;;0BAAA;AACG;AAEA;AACE;;AAEF;AACA\\",\\"file\\":\\"types.d.ts\\"}"`;

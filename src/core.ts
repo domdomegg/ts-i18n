@@ -29,7 +29,11 @@ export type GenerateCommonOptions = {
   emitBrowser?: boolean;
 })
 
-export type GenerateCoreOptions = { inputFiles: File[] } & GenerateCommonOptions
+export type GenerateCoreOptions = { inputFiles: File[] } & GenerateCommonOptions & ({
+  outputToInputPath: string, emitSourceMap?: true
+} | {
+  outputToInputPath?: string, emitSourceMap: false
+})
 
 export type File = { name: string, content: string }
 
@@ -41,6 +45,7 @@ export const generateCore = ({
   emitUtils = true,
   emitBrowser = true,
   emitSourceMap = true,
+  outputToInputPath,
 }: GenerateCoreOptions): File[] => {
   const outputFiles: File[] = [];
 
@@ -64,23 +69,20 @@ export const generateCore = ({
     return acc;
   }, { [originalOffset]: 0, [generatedOffset]: 199 });
 
-  // TODO: check the default language meets the language type (we might get this for free with TS? not sure - need to check)
-  // i.e. assertThat(generateLanguageType(defaultLanguageFile)).isSubTypeOf(languageType)
-
   const typesContent = generateTypes(languageType, { errOnUnusedParam, includePlurals: false, emitSourceMap });
   outputFiles.push({ name: 'types.d.ts', content: typesContent });
 
   if (emitUtils) outputFiles.push({ name: 'utils.ts', content: generateUtils({ inputFiles, defaultLanguage }) });
   if (emitBrowser) outputFiles.push({ name: 'browser.ts', content: generateBrowser() });
-  if (emitSourceMap) outputFiles.push({ name: 'types.d.ts.map', content: generateSourceMap(languageType, defaultLanguageFile.content, typesContent) });
+  if (emitSourceMap) outputFiles.push({ name: 'types.d.ts.map', content: generateSourceMap(languageType, defaultLanguageFile.content, typesContent, `${outputToInputPath}/${defaultLanguageFile.name}`) });
   if (emitGitIgnore) outputFiles.push({ name: '.gitignore', content: `${outputFiles.map((f) => f.name).join('\n')}\n.gitignore` });
 
   return outputFiles;
 };
 
-const generateSourceMap = (languageType: LanguageType, originalContent: string, generatedContent: string): string => {
+const generateSourceMap = (languageType: LanguageType, originalContent: string, generatedContent: string, source: string): string => {
   const sourceMapGenerator = new SourceMapGenerator({ file: 'types.d.ts' });
-  updateSourceMap(languageType, originalContent, generatedContent, sourceMapGenerator, '../resources/large/en.json'); // TODO: find relative path
+  updateSourceMap(languageType, originalContent, generatedContent, sourceMapGenerator, source);
   return sourceMapGenerator.toString();
 };
 

@@ -1,5 +1,5 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { generateCore, File, GenerateCommonOptions } from './core';
 
 export type GenerateFsOptions = { inputDirectory: string; outputDirectory: string; } & GenerateCommonOptions
@@ -9,6 +9,7 @@ export const generateFs = (options: GenerateFsOptions): void => {
   if (!languageFiles.length) throw new Error(`No language files found in ${options.inputDirectory}`);
   const code = generateCore({
     inputFiles: languageFiles,
+    outputToInputPath: relative(options.outputDirectory, options.inputDirectory),
     ...options,
   });
   writeToDirectory(options.outputDirectory, code);
