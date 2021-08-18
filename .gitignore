@@ -121,3 +121,6 @@ dist
 build/
 dist/
 generated/
+
+# scratch directory (for random bits of local testing)
+scratch/
