@@ -103,7 +103,7 @@ const updateSourceMap = (languageType: LanguageType | Set<string> & { [originalO
 const getPosition = (str: string, offset: number): Position => {
   const lines = str.split('\n');
   let n = 0;
-  for (let i = 0; i < lines.length; i += 1) {
+  for (let i = 0; i < lines.length; i++) {
     if (n + lines[i].length + 1 <= offset) {
       n += lines[i].length + 1;
     } else {

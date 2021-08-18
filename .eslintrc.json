@@ -24,7 +24,11 @@
         "object-curly-newline": ["error", {
             "ImportDeclaration": "never",
             "ExportDeclaration": "never"
-        }]
+        }],
+        "no-plusplus": ["error", {
+            "allowForLoopAfterthoughts": true
+        }],
+        "@typescript-eslint/no-non-null-assertion": "off"
     },
     "settings": {
         "import/resolver": {
