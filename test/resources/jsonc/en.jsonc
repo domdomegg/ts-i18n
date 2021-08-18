@@ -1,0 +1,7 @@
+{
+  // This file uses comments
+  "thisIsATest": "This is a test file",
+
+  // We're also allowed trailing commas here
+  "trailingCommasBenefit": "Trailing commas allow for cleaner git diffs",
+}

@@ -9,15 +9,20 @@ beforeEach(() => {
   }
 });
 
-test.each(['simple', 'large'])('fsGenerator generates correct files: %s', (dir) => {
+test.each([
+  ['simple', { langs: ['en', 'fr'] }],
+  ['large', { langs: ['en', 'fr'] }],
+  ['jsonc', { langs: ['en'] }],
+])('fsGenerator generates correct files: %s', (dir, { langs }) => {
   generateFs({
     inputDirectory: `test/resources/${dir}`,
     outputDirectory: 'test/generated',
   });
 
-  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(7);
-  expect(readFileSync(resolve(__dirname, './generated/en.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
-  expect(readFileSync(resolve(__dirname, './generated/fr.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(5 + langs.length);
+  langs.forEach((lang) => {
+    expect(readFileSync(resolve(__dirname, `./generated/${lang}.ts`), { encoding: 'utf-8' })).toMatchSnapshot();
+  });
   expect(readFileSync(resolve(__dirname, './generated/types.d.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/utils.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/browser.ts'), { encoding: 'utf-8' })).toMatchSnapshot();

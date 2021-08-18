@@ -16,7 +16,7 @@ export const generateFs = (options: GenerateFsOptions): void => {
 };
 
 const getLanguageFiles = (directory: string): File[] => readdirSync(resolve(directory))
-  .filter((f) => f.endsWith('.json'))
+  .filter((f) => f.endsWith('.json') || f.endsWith('.jsonc'))
   .map((f) => ({
     name: f,
     content: readFileSync(resolve(directory, f), { encoding: 'utf-8' }),
