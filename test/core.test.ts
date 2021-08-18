@@ -67,3 +67,13 @@ test('can disable emitting browser helper', () => {
     }).map((f) => f.name),
   ).toMatchSnapshot();
 });
+
+test('can disable emitting source map', () => {
+  expect(
+    generateCore({
+      inputFiles: [getFile('simple/en.json')],
+      defaultLanguage: 'en',
+      emitSourceMap: false,
+    }).map((f) => f.name),
+  ).toMatchSnapshot();
+});

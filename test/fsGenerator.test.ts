@@ -15,11 +15,12 @@ test.each(['simple', 'large'])('fsGenerator generates correct files: %s', (dir) 
     outputDirectory: 'test/generated',
   });
 
-  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(6);
+  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(7);
   expect(readFileSync(resolve(__dirname, './generated/en.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/fr.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
-  expect(readFileSync(resolve(__dirname, './generated/types.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/types.d.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/utils.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/browser.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
   expect(readFileSync(resolve(__dirname, './generated/.gitignore'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/types.d.ts.map'), { encoding: 'utf-8' })).toMatchSnapshot();
 });

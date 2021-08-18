@@ -1,6 +1,6 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { generateCore, Files, GenerateCommonOptions } from './core';
+import { generateCore, File, GenerateCommonOptions } from './core';
 
 export type GenerateFsOptions = { inputDirectory: string; outputDirectory: string; } & GenerateCommonOptions
 
@@ -14,14 +14,14 @@ export const generateFs = (options: GenerateFsOptions): void => {
   writeToDirectory(options.outputDirectory, code);
 };
 
-const getLanguageFiles = (directory: string): Files => readdirSync(resolve(directory))
+const getLanguageFiles = (directory: string): File[] => readdirSync(resolve(directory))
   .filter((f) => f.endsWith('.json'))
   .map((f) => ({
     name: f,
     content: readFileSync(resolve(directory, f), { encoding: 'utf-8' }),
   }));
 
-const writeToDirectory = (directory: string, files: Files): void => {
+const writeToDirectory = (directory: string, files: File[]): void => {
   mkdirSync(resolve(directory), { recursive: true });
   files.forEach((file) => {
     const path = resolve(directory, file.name);
