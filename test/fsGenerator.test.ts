@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, rmdirSync, existsSync } from 'fs';
+import { readdirSync, readFileSync, rmdirSync, existsSync, copyFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import { generateFs } from '../src/fsGenerator';
 
@@ -54,4 +54,26 @@ test.each([
     inputDirectory: `test/resources/${dir}`,
     outputDirectory: 'test/generated',
   })).toThrowError(err);
+});
+
+test('handles output and input dir being the same', () => {
+  const langs = ['en', 'fr'];
+
+  mkdirSync(resolve(__dirname, './generated/'));
+  readdirSync(resolve(__dirname, './resources/simple')).forEach((f) => copyFileSync(resolve(__dirname, './resources/simple', f), resolve(__dirname, './generated/', f)));
+
+  generateFs({
+    inputDirectory: 'test/generated',
+    outputDirectory: 'test/generated',
+  });
+
+  expect(readdirSync(resolve(__dirname, './generated/'))).toHaveLength(5 + langs.length * 2);
+  langs.forEach((lang) => {
+    expect(readFileSync(resolve(__dirname, `./generated/${lang}.ts`), { encoding: 'utf-8' })).toMatchSnapshot();
+  });
+  expect(readFileSync(resolve(__dirname, './generated/types.d.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/utils.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/browser.ts'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/.gitignore'), { encoding: 'utf-8' })).toMatchSnapshot();
+  expect(readFileSync(resolve(__dirname, './generated/types.d.ts.map'), { encoding: 'utf-8' })).toMatchSnapshot();
 });

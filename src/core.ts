@@ -75,7 +75,7 @@ export const generateCore = ({
 
   if (emitUtils) outputFiles.push({ name: 'utils.ts', content: generateUtils({ inputFiles, defaultLanguage }) });
   if (emitBrowser) outputFiles.push({ name: 'browser.ts', content: generateBrowser() });
-  if (emitSourceMap) outputFiles.push({ name: 'types.d.ts.map', content: generateSourceMap(languageType, defaultLanguageFile.content, typesContent, `${outputToInputPath}/${defaultLanguageFile.name}`) });
+  if (emitSourceMap) outputFiles.push({ name: 'types.d.ts.map', content: generateSourceMap(languageType, defaultLanguageFile.content, typesContent, `${outputToInputPath || '.'}/${defaultLanguageFile.name}`) });
   if (emitGitIgnore) outputFiles.push({ name: '.gitignore', content: `${outputFiles.map((f) => f.name).join('\n')}\n.gitignore` });
 
   return outputFiles;
