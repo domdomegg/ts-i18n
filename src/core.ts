@@ -288,7 +288,7 @@ const preferredLanguages =
     .slice(0, 25)
 
 let language: Language = defaultLanguage // fallback language
-for (let i = preferredLanguages.length; i > 0; i--) {
+for (let i = preferredLanguages.length; i >= 0; i--) {
   const key = preferredLanguages[i] as keyof typeof languages
   if (key in languages) {
     language = merge(languages[key], language)
