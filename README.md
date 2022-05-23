@@ -4,7 +4,7 @@ Lightweight i18n with proper TypeScript support
 
 Turns JSON translation files:
 
-```json
+```jsonc
 // en.json
 {
   "thereAreXFeatures": "There is {{count}} feature",
