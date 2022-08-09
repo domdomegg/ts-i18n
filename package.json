@@ -4,6 +4,10 @@
   "description": "Lightweight i18n with proper TypeScript support",
   "license": "MIT",
   "author": "Adam Jones (domdomegg)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/domdomegg/ts-i18n.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
