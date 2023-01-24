@@ -95,7 +95,7 @@ Then, in your package.json call it:
   "scripts": {
     "prebuild": "ts-i18n -i i18n/src -o i18n/generated",
   }
-  ...
+  // ...
 }
 ```
 
@@ -117,3 +117,23 @@ These libraries have been selected as I think they're good or popular enough to 
 - FormatJS + @formatjs/ts-transformer: Limited documentation. Also, FormatJS is very powerful but can sometimes be very clunky to use and set up. I'm not certain this provides TypeScript support for translation keys.
 - typed-locale-keys: Limtited documentation. Doesn't supported nested JSON. Doesn't support multiple locales at once. Requires another i18n library for substitutions and plurals.
 - i18n-ts: Doesn't support specifying translation strings in JSON (need to write manually in TypeScript, which is not always translator or translation-platform friendly). Requires specifying translation strings and substitutions manually. Does not support missing keys in non-default languages. Does not support different arguments in different languages.
+
+## Contributing
+
+Pull requests are welcomed on GitHub! To get started:
+
+1. Install Git and Node.js
+2. Clone the repository
+3. Install dependencies with `npm install`
+4. Run `npm run test` to run tests with Jest
+5. Build with `npm run build`
+
+## Releases
+
+Versions follow the [semantic versioning spec](https://semver.org/).
+
+To release:
+
+1. Use `npm version <major | minor | patch>` to bump the version
+2. Run `git push --follow-tags` to push with tags
+3. Wait for GitHub Actions to publish to the NPM registry.

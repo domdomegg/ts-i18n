@@ -1,8 +1,13 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
+import {
+  mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync,
+} from 'fs';
 import { resolve, relative } from 'path';
 import { generateCore, File, GenerateCommonOptions } from './core';
 
-export type GenerateFsOptions = { inputDirectory: string; outputDirectory: string; } & GenerateCommonOptions
+export type GenerateFsOptions = {
+  inputDirectory: string;
+  outputDirectory: string;
+} & GenerateCommonOptions;
 
 export const generateFs = (options: GenerateFsOptions): void => {
   const languageFiles = getLanguageFiles(options.inputDirectory);
