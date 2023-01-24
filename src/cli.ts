@@ -13,9 +13,9 @@ const cli = (args: string[]) => {
     .parse(args);
 
   generateFs({
-    inputDirectory: program.opts().input,
-    outputDirectory: program.opts().output,
-    defaultLanguage: program.opts().defaultLanguage,
+    inputDirectory: program.opts()['input'],
+    outputDirectory: program.opts()['output'],
+    defaultLanguage: program.opts()['defaultLanguage'],
   });
 };
 
