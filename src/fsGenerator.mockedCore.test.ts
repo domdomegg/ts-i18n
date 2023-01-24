@@ -1,13 +1,13 @@
-import { generateFs } from '../src/fsGenerator';
-import { generateCore } from '../src/core';
+import { generateFs } from './fsGenerator';
+import { generateCore } from './core';
 
 jest.mock('../src/core');
 beforeEach(() => (generateCore as jest.Mock).mockReset().mockReturnValue([]));
 
 test('can disable emitting .gitignore', () => {
   generateFs({
-    inputDirectory: 'test/resources/simple',
-    outputDirectory: 'test/generated',
+    inputDirectory: 'sample_configs/simple',
+    outputDirectory: 'sample_configs/generated',
     emitGitIgnore: false,
   });
 
@@ -17,8 +17,8 @@ test('can disable emitting .gitignore', () => {
 
 test('can disable emitting utils', () => {
   generateFs({
-    inputDirectory: 'test/resources/simple',
-    outputDirectory: 'test/generated',
+    inputDirectory: 'sample_configs/simple',
+    outputDirectory: 'sample_configs/generated',
     emitUtils: false,
     emitBrowser: false,
   });
@@ -29,8 +29,8 @@ test('can disable emitting utils', () => {
 
 test('can disable emitting browser helper', () => {
   generateFs({
-    inputDirectory: 'test/resources/simple',
-    outputDirectory: 'test/generated',
+    inputDirectory: 'sample_configs/simple',
+    outputDirectory: 'sample_configs/generated',
     emitBrowser: false,
   });
 

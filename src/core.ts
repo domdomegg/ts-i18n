@@ -5,16 +5,29 @@ import bannedNames from './bannedNames';
 const originalOffset = Symbol.for('offset');
 const generatedOffset = Symbol.for('generatedOffset');
 
-// TODO: consider splitting this out into pre-and-post adding generated offsets
-// TODO: consider refactoring to avoid cluttering the types with source map data
-type LanguageType = {
-  [key: string]: LanguageType | Set<string> & { [originalOffset]: number, [generatedOffset]?: number }
-  [originalOffset]: number
-  [generatedOffset]?: number
-}
+type LanguageIRProcessedType = {
+  [key: string]:
+  // Nested section
+  | LanguageIRProcessedType
+  // Entry: set of parameters
+  | Set<string> & { [originalOffset]: number }
 
-type LanguageDefinition = { [key: string]: LanguageDefinitionKey }
-type LanguageDefinitionKey = LanguageDefinition | string
+  [originalOffset]: number
+};
+
+type LanguageIRGeneratedType = {
+  [key: string]:
+  // Nested section
+  | LanguageIRGeneratedType
+  // Entry: set of parameters
+  | Set<string> & { [originalOffset]: number, [generatedOffset]: number }
+
+  [originalOffset]: number
+  [generatedOffset]: number
+};
+
+type LanguageDefinition = { [key: string]: LanguageDefinitionKey };
+type LanguageDefinitionKey = LanguageDefinition | string;
 
 export type GenerateCommonOptions = {
   defaultLanguage?: string;
@@ -27,15 +40,15 @@ export type GenerateCommonOptions = {
 } | {
   emitUtils?: true;
   emitBrowser?: boolean;
-})
+});
 
 export type GenerateCoreOptions = { inputFiles: File[] } & GenerateCommonOptions & ({
   outputToInputPath: string, emitSourceMap?: true
 } | {
   outputToInputPath?: string, emitSourceMap: false
-})
+});
 
-export type File = { name: string, content: string }
+export type File = { name: string, content: string };
 
 export const generateCore = ({
   inputFiles,
@@ -59,7 +72,7 @@ export const generateCore = ({
   }
 
   const inputFilesDefaultFirst = [defaultLanguageFile, ...inputFiles.filter((f) => f !== defaultLanguageFile)];
-  const languageType: LanguageType = inputFilesDefaultFirst.reduce<LanguageType>((acc, file) => {
+  const languageTypeProcessed: LanguageIRProcessedType = inputFilesDefaultFirst.reduce<LanguageIRProcessedType>((acc, file) => {
     if (!file.name.endsWith('.json') && !file.name.endsWith('.jsonc')) throw new Error(`Input file names must end with .json, but received ${file.name}`);
     const parsedContent = parseTree(file.content);
     if (!parsedContent) throw new Error(`Invalid JSON in ${file.name}`);
@@ -70,33 +83,34 @@ export const generateCore = ({
     return acc;
   }, { [originalOffset]: 0, [generatedOffset]: 199 });
 
-  const typesContent = generateTypes(languageType, { errOnUnusedParam, includePlurals: false, emitSourceMap });
+  const typesContent = generateTypes(languageTypeProcessed, { errOnUnusedParam, includePlurals: false, emitSourceMap });
+  const languageTypeGenerated = languageTypeProcessed as LanguageIRGeneratedType;
   outputFiles.push({ name: 'types.d.ts', content: typesContent });
 
   if (emitUtils) outputFiles.push({ name: 'utils.ts', content: generateUtils({ inputFiles, defaultLanguage }) });
   if (emitBrowser) outputFiles.push({ name: 'browser.ts', content: generateBrowser() });
-  if (emitSourceMap) outputFiles.push({ name: 'types.d.ts.map', content: generateSourceMap(languageType, defaultLanguageFile.content, typesContent, `${outputToInputPath || '.'}/${defaultLanguageFile.name}`) });
+  if (emitSourceMap) outputFiles.push({ name: 'types.d.ts.map', content: generateSourceMap(languageTypeGenerated, defaultLanguageFile.content, typesContent, `${outputToInputPath || '.'}/${defaultLanguageFile.name}`) });
   if (emitGitIgnore) outputFiles.push({ name: '.gitignore', content: `${outputFiles.map((f) => f.name).join('\n')}\n.gitignore` });
 
   return outputFiles;
 };
 
-const generateSourceMap = (languageType: LanguageType, originalContent: string, generatedContent: string, source: string): string => {
+const generateSourceMap = (languageType: LanguageIRGeneratedType, originalContent: string, generatedContent: string, source: string): string => {
   const sourceMapGenerator = new SourceMapGenerator({ file: 'types.d.ts' });
   updateSourceMap(languageType, originalContent, generatedContent, sourceMapGenerator, source);
   return sourceMapGenerator.toString();
 };
 
-const updateSourceMap = (languageType: LanguageType | Set<string> & { [originalOffset]: number, [generatedOffset]?: number }, originalContent: string, generatedContent: string, sourceMapGenerator: SourceMapGenerator, source: string) => {
+const updateSourceMap = (languageType: LanguageIRGeneratedType[string], originalContent: string, generatedContent: string, sourceMapGenerator: SourceMapGenerator, source: string) => {
   sourceMapGenerator.addMapping({
     original: getPosition(originalContent, languageType[originalOffset]),
-    generated: getPosition(generatedContent, languageType[generatedOffset]!),
+    generated: getPosition(generatedContent, languageType[generatedOffset]),
     source,
   });
 
   if (languageType instanceof Set) return;
 
-  Object.entries(languageType).forEach(([k, v]) => {
+  Object.entries(languageType).forEach(([, v]) => {
     updateSourceMap(v, originalContent, generatedContent, sourceMapGenerator, source);
   });
 };
@@ -105,34 +119,15 @@ const getPosition = (str: string, offset: number): Position => {
   const lines = str.split('\n');
   let n = 0;
   for (let i = 0; i < lines.length; i++) {
-    if (n + lines[i].length + 1 <= offset) {
-      n += lines[i].length + 1;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const line = lines[i]!;
+    if (n + line.length + 1 <= offset) {
+      n += line.length + 1;
     } else {
       return { line: i + 1, column: offset - n };
     }
   }
   throw new Error(`Offset ${offset} longer than string length ${str.length}`);
-};
-
-// Checks an object is a valid language definition, throwing if it isn't one
-const asLanguageDefinition = (obj: unknown, errorIn?: string): LanguageDefinition => {
-  if (Array.isArray(obj)) {
-    throw new Error(`Invalid language definition as found array${errorIn ? ` (in ${errorIn})` : ''}`);
-  }
-
-  if (typeof obj !== 'object') {
-    throw new Error(`Invalid language definition as found ${typeof obj}${errorIn ? ` (in ${errorIn})` : ''}`);
-  }
-
-  Object.entries(obj as { [key: string]: unknown }).forEach(([key, value]) => {
-    if (!/[a-zA-Z_$][0-9a-zA-Z_$]*/.test(key)) throw new Error(`Invalid language definition due to bad key: '${key}'${errorIn ? ` (in ${errorIn})` : ''}`);
-
-    if (typeof value !== 'string') {
-      asLanguageDefinition(value, errorIn);
-    }
-  });
-
-  return obj as LanguageDefinition;
 };
 
 /**
@@ -141,7 +136,7 @@ const asLanguageDefinition = (obj: unknown, errorIn?: string): LanguageDefinitio
  * @param isDefault Whether this is the default language
  * @returns code for the given language definition
  */
-const generateCode = (language: Node, type: LanguageType, isDefault: boolean): string => (
+const generateCode = (language: Node, type: LanguageIRProcessedType, isDefault: boolean): string => (
   `// Do not edit directly, this is generated by ts-i18n
 /* eslint-disable */
 import { Language${isDefault ? '' : ', DeepPartial'} } from "./types"
@@ -156,25 +151,30 @@ export default lang as ${(isDefault ? 'Language' : 'DeepPartial<Language>')}\n`
  * @returns fragment of code for the given language definition, and updated constraints on the language type
  */
 /* eslint-disable no-param-reassign */
-const generateCodeFragment = (language: Node, type: LanguageType, isDefault: boolean, path = '') => {
+const generateCodeFragment = (language: Node, type: LanguageIRProcessedType, isDefault: boolean, path = '') => {
   let code = '';
   if (language.type === 'object') {
-    const key: string = language.parent ? language.parent!.children![0].value : undefined;
+    const key: string | undefined = language.parent?.children?.[0]?.value;
     if (key) {
       if (type[key] === undefined && isDefault) {
-        type[key] = { [originalOffset]: language.parent!.children![0].offset + 1 };
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        type[key] = { [originalOffset]: language.parent!.children![0]!.offset + 1 };
       } else if (type[key] === undefined) {
         throw new Error(`Default language is missing entry at ${path}`);
       } else if (type[key] instanceof Set) {
         throw new Error(`Incompatible type, found both object and string at ${path}`);
       }
-      type = type[key] as LanguageType;
+      type = type[key] as LanguageIRProcessedType;
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     code += `{\n${indent(language.children!.map((c) => generateCodeFragment(c, type, isDefault, path)).join(',\n'))},\n}`;
   } else if (language.type === 'property') {
-    code += `${generateCodeFragment(language.children![0], type, isDefault, path)}: ${generateCodeFragment(language.children![1], type as LanguageType, isDefault, `${path}.${language.children![0].value}`)}`;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    code += `${generateCodeFragment(language.children![0]!, type, isDefault, path)}: ${generateCodeFragment(language.children![1]!, type as LanguageIRProcessedType, isDefault, `${path}.${language.children![0]!.value}`)}`;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   } else if (language.type === 'string' && language === language.parent!.children![0]) { // property key
     code += language.value;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   } else if (language.type === 'string' && language === language.parent!.children![1]) { // string value
     const stringified = JSON.stringify(language.value);
 
@@ -183,8 +183,10 @@ const generateCodeFragment = (language: Node, type: LanguageType, isDefault: boo
     params.forEach((param) => {
       if (bannedNames.includes(param)) throw new Error(`Cannot use param name '${param}' as it is a reserved word`);
     });
-    const key: string = language.parent!.children![0].value;
-    const hasPlural = language.parent!.parent!.children!.some((c) => c.type === 'property' && c.children![0].value === `${key}_plural`);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const key: string = language.parent!.children![0]!.value;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const hasPlural = language.parent!.parent!.children!.some((c) => c.type === 'property' && c.children![0]!.value === `${key}_plural`);
 
     if (params.length && hasPlural) {
       const countRequired = params.includes('count');
@@ -203,7 +205,8 @@ const generateCodeFragment = (language: Node, type: LanguageType, isDefault: boo
     const singularKey = key.endsWith('_plural') ? key.slice(0, -('_plural'.length)) : key;
     if (type[singularKey] === undefined && isDefault) {
       type[singularKey] = new Set(params) as Set<string> & { [originalOffset]: number };
-      type[singularKey][originalOffset] = language.parent!.children![0].offset + 1;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      type[singularKey]![originalOffset] = language.parent!.children![0]!.offset + 1;
     } else if (type[singularKey] === undefined) {
       throw new Error(`Default language is missing entry at ${path}`);
     } else if (type[singularKey] instanceof Set) {
@@ -222,14 +225,14 @@ const generateCodeFragment = (language: Node, type: LanguageType, isDefault: boo
  * @returns type declaration code for the given language definition
  */
 /* eslint-disable no-param-reassign */
-const generateTypes = (languageType: LanguageType, options: { errOnUnusedParam: boolean, includePlurals: boolean, emitSourceMap: boolean }) => (
+const generateTypes = (languageType: LanguageIRProcessedType, options: { errOnUnusedParam: boolean, includePlurals: boolean, emitSourceMap: boolean }) => (
   `${'// Do not edit directly, this is generated by ts-i18n\n'
   + '/* eslint-disable */\n'
   + 'export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; }\n'
   + 'export interface Language '}${generateTypeFragment(languageType, 199, options)}${options.emitSourceMap ? '\n//# sourceMappingURL=types.d.ts.map' : ''}\n`
 );
 
-const generateTypeFragment = (languageType: LanguageType | Set<string>, offset: number, options: { errOnUnusedParam: boolean, includePlurals: boolean }) => {
+const generateTypeFragment = (languageType: LanguageIRProcessedType[string], offset: number, options: { errOnUnusedParam: boolean, includePlurals: boolean }) => {
   let code = '';
   if (languageType instanceof Set && languageType.size === 0) {
     code += `(${options.errOnUnusedParam ? '' : 'p?: { [key: string]: string | number }'}) => string`;
@@ -237,8 +240,8 @@ const generateTypeFragment = (languageType: LanguageType | Set<string>, offset: 
     code += `(p: { ${[...languageType].map((p) => (p === 'count' ? `${p}: number` : `${p}: string | number`)).join(', ')}${options.errOnUnusedParam ? '' : ', [key: string]: string | number'} }) => string`;
   } else {
     offset += 2;
-    code += `{\n${Object.entries(languageType).filter(([k, v]) => options.includePlurals || !k.endsWith('_plural')).map(([k, v]) => {
-      v[generatedOffset] = offset;
+    code += `{\n${Object.entries(languageType).filter(([k]) => options.includePlurals || !k.endsWith('_plural')).map(([k, v]) => {
+      (v as LanguageIRGeneratedType)[generatedOffset] = offset;
       const r = `${k}: ${generateTypeFragment(v, offset + `${k}: `.length, options)}`;
       offset += r.length + 2;
       return r;
