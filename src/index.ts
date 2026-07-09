@@ -1,2 +1,2 @@
-export { generateCore, GenerateCoreOptions } from './core';
-export { generateFs, GenerateFsOptions } from './fsGenerator';
+export {generateCore, type GenerateCoreOptions} from './core';
+export {generateFs, type GenerateFsOptions} from './fsGenerator';
